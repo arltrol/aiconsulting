@@ -13,26 +13,94 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>London's Trusted AI Consultant for Charities & SMEs</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f8f9fa; color: #222; }
-    header { background-color: #101820; color: #fff; padding: 40px 20px 30px 20px; text-align: center; }
-    h1 { margin-top: 0; font-size: 2.3rem; }
-    .cta, .lead-magnet-cta { display: inline-block; background: #007bff; color: white; padding: 13px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 25px auto 10px auto; font-size: 1.13rem; }
-    .section { padding: 34px 20px; max-width: 1050px; margin: auto; }
-    .industry-box, .services-box, .faq-box, .lead-magnet { background: white; border-radius: 12px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .process-visual { text-align: center; margin: 40px 0; }
-    .process-steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 24px; }
-    .step { background: #e9ecef; border-radius: 10px; padding: 18px 16px; width: 200px; min-width: 180px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);}
-    footer { background: #101820; color: white; text-align: center; padding: 22px; font-size: 15px; margin-top: 40px;}
-    input[type="email"] { padding: 10px; width: 80%; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ccc; }
-    @media (max-width: 700px) {
-      h1 { font-size: 1.25rem; }
-      h2 { font-size: 1.12rem; }
-      .section { padding: 20px 4vw; }
-      .industry-box, .services-box, .faq-box, .lead-magnet { padding: 14px; }
-      .process-steps { flex-direction: column; gap: 10px;}
-      .step { width: 98%; min-width: unset;}
-       .team-logos {
+ <style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f8f9fa;
+    color: #222;
+  }
+
+  header {
+    background-color: #101820;
+    color: #fff;
+    padding: 40px 20px 30px 20px;
+    text-align: center;
+  }
+
+  h1 {
+    margin-top: 0;
+    font-size: 2.3rem;
+  }
+
+  .cta, .lead-magnet-cta {
+    display: inline-block;
+    background: #007bff;
+    color: white;
+    padding: 13px 28px;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    margin: 25px auto 10px auto;
+    font-size: 1.13rem;
+  }
+
+  .section {
+    padding: 34px 20px;
+    max-width: 1050px;
+    margin: auto;
+  }
+
+  .industry-box, .services-box, .faq-box, .lead-magnet {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .process-visual {
+    text-align: center;
+    margin: 40px 0;
+  }
+
+  .process-steps {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .step {
+    background: #e9ecef;
+    border-radius: 10px;
+    padding: 18px 16px;
+    width: 200px;
+    min-width: 180px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  footer {
+    background: #101820;
+    color: white;
+    text-align: center;
+    padding: 22px;
+    font-size: 15px;
+    margin-top: 40px;
+  }
+
+  input[type="email"] {
+    padding: 10px;
+    width: 80%;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  /* ✅ Global Team Logos Styling */
+  .team-logos {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -45,18 +113,25 @@
 
   .team-logos img {
     height: 50px;
-    max-width: 140px; /* 👈 controls logo max width on desktop */
+    max-width: 120px;
     width: auto;
     object-fit: contain;
   }
 
-  @media (max-width: 600px) {
+  /* ✅ Only applies on small screens */
+  @media (max-width: 700px) {
+    h1 { font-size: 1.25rem; }
+    h2 { font-size: 1.12rem; }
+    .section { padding: 20px 4vw; }
+    .industry-box, .services-box, .faq-box, .lead-magnet { padding: 14px; }
+    .process-steps { flex-direction: column; gap: 10px; }
+    .step { width: 98%; min-width: unset; }
     .team-logos img {
-      max-width: 90px; /* smaller logos on very small screens */
+      max-width: 90px;
       height: 40px;
     }
   }
-  </style>
+</style>
 
 </head>
 

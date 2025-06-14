@@ -32,7 +32,7 @@
       .industry-box, .services-box, .faq-box, .lead-magnet { padding: 14px; }
       .process-steps { flex-direction: column; gap: 10px;}
       .step { width: 98%; min-width: unset;}
-      .team-logos {
+       .team-logos {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -45,10 +45,17 @@
 
   .team-logos img {
     height: 50px;
-    max-width: 120px;
+    max-width: 140px; /* 👈 controls logo max width on desktop */
+    width: auto;
     object-fit: contain;
   }
+
+  @media (max-width: 600px) {
+    .team-logos img {
+      max-width: 90px; /* smaller logos on very small screens */
+      height: 40px;
     }
+  }
   </style>
 
 </head>

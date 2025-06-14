@@ -32,6 +32,22 @@
       .industry-box, .services-box, .faq-box, .lead-magnet { padding: 14px; }
       .process-steps { flex-direction: column; gap: 10px;}
       .step { width: 98%; min-width: unset;}
+      .team-logos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .team-logos img {
+    height: 50px;
+    max-width: 120px;
+    object-fit: contain;
+  }
     }
   </style>
 
@@ -265,13 +281,15 @@
 </section>
 
 <!-- Team Background -->
-<h3>Team Background</h3>
-<div class="team-logos">
-  <img src="assets/goldman.png" alt="Goldman Sachs">
-  <img src="assets/lifelock.png" alt="LifeLock by Norton">
-  <img src="assets/proofpoint.png" alt="Proofpoint">
-  <img src="assets/avira.png" alt="Avira">
-</div>
+<section class="section">
+  <h2>Team Background</h2>
+  <div class="team-logos">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Goldman_Sachs.svg/640px-Goldman_Sachs.svg.png" alt="Goldman Sachs" />
+    <img src="https://upload.wikimedia.org/wikipedia/en/b/bc/Lifelockbynorton.png" alt="Norton Life Lock" />
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Proofpoint_R_Logo.png/2560px-Proofpoint_R_Logo.png" alt="Proofpoint" />
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Avira_logo_2014.svg/460px-Avira_logo_2014.svg.png" alt="Avira" />
+  </div>
+</section>
 
 
   <section class="section" id="contact">

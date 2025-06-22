@@ -1,67 +1,53 @@
-// netlify/functions/scan.js
+document.getElementById("scan-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-const { Configuration, OpenAIApi } = require("openai");
+  const email = document.getElementById("email").value;
+  const website = document.getElementById("website").value;
+  const resultsContainer = document.getElementById("scan-results");
+  const scannedUrlSpan = document.getElementById("scanned-url");
+  const errorMessage = document.getElementById("error-message");
+  const loadingIndicator = document.getElementById("loading-indicator");
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
-
-exports.handler = async function (event, context) {
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: "Method not allowed" }),
-    };
-  }
+  resultsContainer.style.display = "none";
+  errorMessage.style.display = "none";
+  loadingIndicator.style.display = "block";
 
   try {
-    const { website, name, email } = JSON.parse(event.body || '{}');
-
-    if (!website || !name || !email) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Missing required fields" }),
-      };
-    }
-
-    const prompt = `
-You are an expert AI consultant. Based on the public-facing website at ${website}, generate a concise but informative 'AI Readiness Report' for the organisation. Highlight:
-- Potential use cases for AI (in operations, marketing, finance, etc.)
-- Observations about their digital maturity
-- Risks or gaps that would prevent them from leveraging AI
-Format it as a friendly but insightful report aimed at non-technical leadership.
-`;
-
-    const completion = await openai.createChatCompletion({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: "You are an AI strategy consultant." },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.7,
+    const response = await fetch("/.netlify/functions/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, website })
     });
 
-    const result = completion.data.choices[0].message.content;
+    loadingIndicator.style.display = "none";
+    resultsContainer.style.display = "block";
+    scannedUrlSpan.innerText = website;
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        website,
-        name,
-        email,
-        result,
-      }),
-    };
-  } catch (error) {
-    console.error("❌ OpenAI Error", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: "Internal Server Error",
-        message: error.message,
-        stack: error.stack,
-      }),
-    };
+    if (!response.ok) {
+      const text = await response.text();
+      errorMessage.style.display = "block";
+      errorMessage.innerHTML = `❌ Something went wrong.<br>Status: ${response.status}<br>Message: ${text}`;
+      console.error("Server error:", response.status, text);
+      return;
+    }
+
+    const result = await response.json();
+
+    if (result.success) {
+      document.getElementById("result-text").innerHTML = result.report || "✅ Scan complete.";
+      errorMessage.style.display = "none";
+    } else {
+      errorMessage.style.display = "block";
+      errorMessage.innerHTML = `❌ ${result.message || "Scan failed unexpectedly."}`;
+      console.error("Function error:", result);
+    }
+  } catch (err) {
+    loadingIndicator.style.display = "none";
+    resultsContainer.style.display = "block";
+    scannedUrlSpan.innerText = website;
+
+    errorMessage.style.display = "block";
+    errorMessage.innerHTML = `❌ Network or unexpected error.<br>${err.message}`;
+    console.error("Exception thrown:", err);
   }
-};
+});

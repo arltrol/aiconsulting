@@ -1,35 +1,43 @@
-document.getElementById('scanForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
+const fetch = require('node-fetch');
 
-  const website = document.getElementById('website').value;
-  const resultSection = document.getElementById('scan-result');
-  const scannedSite = document.getElementById('scanned-site');
-  const scanOutput = document.getElementById('scan-output');
-
-  // Show the result section and scanned website
-  resultSection.style.display = 'block';
-  scannedSite.innerText = website;
-  scanOutput.innerHTML = '⏳ Scanning...';
-
+exports.handler = async function(event, context) {
   try {
-    const response = await fetch('/.netlify/functions/scan', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ website })
-    });
+    const { website } = JSON.parse(event.body);
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      // If server responded but not OK, throw the error message if available
-      throw new Error(data.error || 'Unknown error occurred');
+    // Validate the website input
+    if (!website || !website.startsWith('http')) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Invalid website URL provided.' }),
+      };
     }
 
-    scanOutput.innerHTML = `<pre>${data.result}</pre>`;
+    // Fetch website content
+    const response = await fetch(website);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${website}: ${response.statusText}`);
+    }
+    const html = await response.text();
+
+    // Simulate AI readiness score
+    const score = Math.floor(Math.random() * 100) + 1;
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        scannedUrl: website,
+        score: score,
+        message: "AI readiness scan completed successfully",
+      }),
+    };
   } catch (error) {
-    console.error('Scan error:', error);
-    scanOutput.innerHTML = `❌ <strong>Something went wrong.</strong><br><code>${error.message}</code>`;
+    console.error("❌ SCAN FAILED", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Something went wrong on the server.",
+        details: error.message,
+      }),
+    };
   }
-});
+};

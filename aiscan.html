@@ -71,7 +71,6 @@
       display: none;
       padding: 1.5rem;
       margin-top: 2rem;
-      margin-bottom: 2rem;
       border: 1px solid #ddd;
       border-radius: 10px;
       background: #fefefe;
@@ -126,8 +125,8 @@
       <button type="submit">Run AI Scan</button>
     </form>
 
-    <!-- Netlify hidden form for email notification -->
-    <form name="netlify-scan" netlify netlify-honeypot="bot-field" hidden>
+    <!-- Hidden Netlify form to trigger email notification -->
+    <form name="netlify-scan" data-netlify="true" netlify-honeypot="bot-field" hidden>
       <input type="text" name="name" />
       <input type="email" name="email" />
       <input type="url" name="website" />
@@ -138,7 +137,9 @@
       <h2>🔍 AI Readiness Results</h2>
       <p><strong>Scanned website:</strong> <span id="scanned-url"></span></p>
       <div id="scan-output" class="styled-report"></div>
-      <a class="cta-button" href="https://calendly.com/roland2017/30min" target="_blank">📞 Schedule a Free AI Consultation</a>
+      <a class="cta-button" href="https://calendly.com/roland2017/30min" target="_blank">
+        📞 Schedule a Free AI Consultation
+      </a>
     </div>
   </div>
 
@@ -153,49 +154,54 @@
   </footer>
 
   <script>
-  async function handleScan(event) {
-    event.preventDefault();
-    const form = document.getElementById('ai-scan-form');
-    const name = form.querySelector('input[name="name"]').value.trim();
-    const email = form.querySelector('input[name="email"]').value.trim();
-    let website = form.querySelector('input[name="website"]').value.trim();
+    async function handleScan(event) {
+      event.preventDefault();
+      const form = document.getElementById('ai-scan-form');
+      const name = form.querySelector('input[name="name"]').value.trim();
+      const email = form.querySelector('input[name="email"]').value.trim();
+      let website = form.querySelector('input[name="website"]').value.trim();
 
-    // Clean up and normalize the website input
-    if (!website.startsWith('http')) {
-      website = 'https://' + website;
-    }
+      if (!website.startsWith('http')) {
+        website = 'https://' + website;
+      }
 
-    // Update Netlify hidden form to trigger email notification
-    const netlifyForm = document.forms['netlify-scan'];
-    netlifyForm.elements['name'].value = name;
-    netlifyForm.elements['email'].value = email;
-    netlifyForm.elements['website'].value = website;
-    netlifyForm.submit();
+      document.getElementById('scanned-url').textContent = website;
+      const resultBox = document.getElementById('result-box');
+      const scanOutput = document.getElementById('scan-output');
+      resultBox.style.display = 'block';
+      scanOutput.innerHTML = '<p>⏳ Scanning website and generating insights…</p>';
 
-    // Display scanning message and send request to Netlify function
-    const resultBox = document.getElementById('result-box');
-    const scanOutput = document.getElementById('scan-output');
-    document.getElementById('scanned-url').textContent = website;
-    resultBox.style.display = 'block';
-    scanOutput.innerHTML = '<p>⏳ Scanning website and generating insights…</p>';
+      // Submit Netlify form behind the scenes
+      const netlifyFormData = new FormData();
+      netlifyFormData.append('form-name', 'netlify-scan');
+      netlifyFormData.append('name', name);
+      netlifyFormData.append('email', email);
+      netlifyFormData.append('website', website);
 
-    try {
-      const response = await fetch('/.netlify/functions/scan', {
+      fetch('/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, website })
+        body: netlifyFormData
+      }).catch(err => {
+        console.warn('Silent Netlify notification failed:', err);
       });
 
-      const data = await response.json();
-      if (data.report) {
-        scanOutput.innerHTML = `<div>${data.report.replace(/\n/g, '<br>')}</div>`;
-      } else {
-        scanOutput.innerHTML = `<p>❌ Something went wrong. ${data.error || ''}</p>`;
+      try {
+        const response = await fetch('/.netlify/functions/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, website })
+        });
+
+        const data = await response.json();
+        if (data.report) {
+          scanOutput.innerHTML = `<div>${data.report.replace(/\n/g, '<br>')}</div>`;
+        } else {
+          scanOutput.innerHTML = `<p>❌ Something went wrong. ${data.error || ''}</p>`;
+        }
+      } catch (err) {
+        scanOutput.innerHTML = `<p>⚠️ Error: ${err.message}</p>`;
       }
-    } catch (err) {
-      scanOutput.innerHTML = `<p>⚠️ Error: ${err.message}</p>`;
     }
-  }
   </script>
 </body>
 </html>

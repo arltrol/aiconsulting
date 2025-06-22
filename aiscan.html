@@ -118,12 +118,13 @@
       <label>Email address:</label>
       <input type="email" name="email" required />
       <label>Charity or organization website:</label>
-      <input type="url" name="website" placeholder="https://example.org" required />
+      <input type="text" name="website" id="website-input" pattern=".*\..*" placeholder="https://example.org or aceofclubs.org.uk" required />
       <button type="submit">Run AI Scan</button>
     </form>
 
     <div class="result-box" id="result-box">
       <h2>🔍 AI Readiness Score: 52/100</h2>
+      <p><strong>Scanned website:</strong> <span id="scanned-url"></span></p>
       <p><strong>Observations:</strong></p>
       <ul>
         <li>📢 No blog content detected — low repurpose potential</li>
@@ -151,6 +152,8 @@
       event.preventDefault();
       const form = event.target;
       const data = new FormData(form);
+      const scannedUrl = form.querySelector("#website-input").value;
+      document.getElementById("scanned-url").textContent = scannedUrl;
 
       fetch("/", {
         method: "POST",

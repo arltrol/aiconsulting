@@ -1,64 +1,35 @@
-const fetch = require("node-fetch");
-const { Configuration, OpenAIApi } = require("openai");
+document.getElementById('scanForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+  const website = document.getElementById('website').value;
+  const resultSection = document.getElementById('scan-result');
+  const scannedSite = document.getElementById('scanned-site');
+  const scanOutput = document.getElementById('scan-output');
 
-exports.handler = async function (event) {
+  // Show the result section and scanned website
+  resultSection.style.display = 'block';
+  scannedSite.innerText = website;
+  scanOutput.innerHTML = '⏳ Scanning...';
+
   try {
-    const { url } = JSON.parse(event.body || '{}');
-
-    if (!url) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Missing website URL" }),
-      };
-    }
-
-    // 🔧 Clean + validate input URL
-    const cleanUrl = url.startsWith("http") ? url.trim() : `https://${url.trim()}`;
-    let pageContent = "";
-
-    try {
-      const response = await fetch(cleanUrl);
-      if (!response.ok) throw new Error(`Failed to fetch ${cleanUrl}: ${response.status}`);
-      pageContent = await response.text();
-    } catch (err) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: `Could not load website: ${err.message}` }),
-      };
-    }
-
-    // 🧠 Call OpenAI with scraped content
-    const gptPrompt = `
-      A charity website says:
-      ---
-      ${pageContent.slice(0, 4000)}
-      ---
-      Based on this, what 3 ways could this organization use AI to increase impact or reduce admin? Be specific and use plain English.
-    `;
-
-    const aiResponse = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      temperature: 0.7,
-      messages: [{ role: "user", content: gptPrompt }],
+    const response = await fetch('/.netlify/functions/scan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ website })
     });
 
-    const resultText = aiResponse?.data?.choices?.[0]?.message?.content || "No result from AI.";
+    const data = await response.json();
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ result: resultText }),
-    };
+    if (!response.ok) {
+      // If server responded but not OK, throw the error message if available
+      throw new Error(data.error || 'Unknown error occurred');
+    }
 
-  } catch (err) {
-    console.error("❌ Server error:", err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Server error: " + err.message }),
-    };
+    scanOutput.innerHTML = `<pre>${data.result}</pre>`;
+  } catch (error) {
+    console.error('Scan error:', error);
+    scanOutput.innerHTML = `❌ <strong>Something went wrong.</strong><br><code>${error.message}</code>`;
   }
-};
+});

@@ -1,53 +1,52 @@
-document.getElementById("scan-form").addEventListener("submit", async function (e) {
-  e.preventDefault();
+const OpenAI = require('openai');
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
-  const email = document.getElementById("email").value;
-  const website = document.getElementById("website").value;
-  const resultsContainer = document.getElementById("scan-results");
-  const scannedUrlSpan = document.getElementById("scanned-url");
-  const errorMessage = document.getElementById("error-message");
-  const loadingIndicator = document.getElementById("loading-indicator");
-
-  resultsContainer.style.display = "none";
-  errorMessage.style.display = "none";
-  loadingIndicator.style.display = "block";
-
+exports.handler = async (event) => {
   try {
-    const response = await fetch("/.netlify/functions/scan", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, website })
+    if (event.httpMethod !== 'POST') {
+      return {
+        statusCode: 405,
+        body: JSON.stringify({ error: 'Method not allowed' })
+      };
+    }
+
+    const { website, email, name } = JSON.parse(event.body || '{}');
+
+    if (!website || !email || !name) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Missing input fields' })
+      };
+    }
+
+    const prompt = `You are an expert AI consultant. Based on the website "${website}", provide a brief AI readiness assessment. Identify any areas where AI could offer value, opportunities for automation or insight, and how prepared this organization seems to be from their public website alone. Be specific but concise (max 200 words).`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7
     });
 
-    loadingIndicator.style.display = "none";
-    resultsContainer.style.display = "block";
-    scannedUrlSpan.innerText = website;
+    const resultText = completion.choices[0].message.content;
 
-    if (!response.ok) {
-      const text = await response.text();
-      errorMessage.style.display = "block";
-      errorMessage.innerHTML = `❌ Something went wrong.<br>Status: ${response.status}<br>Message: ${text}`;
-      console.error("Server error:", response.status, text);
-      return;
-    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        result: resultText,
+        website: website
+      })
+    };
+  } catch (error) {
+    console.error('❌ Error in scan function:', error);
 
-    const result = await response.json();
-
-    if (result.success) {
-      document.getElementById("result-text").innerHTML = result.report || "✅ Scan complete.";
-      errorMessage.style.display = "none";
-    } else {
-      errorMessage.style.display = "block";
-      errorMessage.innerHTML = `❌ ${result.message || "Scan failed unexpectedly."}`;
-      console.error("Function error:", result);
-    }
-  } catch (err) {
-    loadingIndicator.style.display = "none";
-    resultsContainer.style.display = "block";
-    scannedUrlSpan.innerText = website;
-
-    errorMessage.style.display = "block";
-    errorMessage.innerHTML = `❌ Network or unexpected error.<br>${err.message}`;
-    console.error("Exception thrown:", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: 'Server error occurred',
+        detail: error.message || 'Unknown error'
+      })
+    };
   }
-});
+};

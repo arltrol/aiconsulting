@@ -1,43 +1,53 @@
-const fetch = require('node-fetch');
+document.getElementById("scan-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
 
-exports.handler = async function(event, context) {
+  const email = document.getElementById("email").value;
+  const website = document.getElementById("website").value;
+  const resultsContainer = document.getElementById("scan-results");
+  const scannedUrlSpan = document.getElementById("scanned-url");
+  const errorMessage = document.getElementById("error-message");
+  const loadingIndicator = document.getElementById("loading-indicator");
+
+  resultsContainer.style.display = "none";
+  errorMessage.style.display = "none";
+  loadingIndicator.style.display = "block";
+
   try {
-    const { website } = JSON.parse(event.body);
+    const response = await fetch("/.netlify/functions/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, website })
+    });
 
-    // Validate the website input
-    if (!website || !website.startsWith('http')) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Invalid website URL provided.' }),
-      };
-    }
+    loadingIndicator.style.display = "none";
+    resultsContainer.style.display = "block";
+    scannedUrlSpan.innerText = website;
 
-    // Fetch website content
-    const response = await fetch(website);
     if (!response.ok) {
-      throw new Error(`Failed to fetch ${website}: ${response.statusText}`);
+      const text = await response.text();
+      errorMessage.style.display = "block";
+      errorMessage.innerHTML = `❌ Something went wrong.<br>Status: ${response.status}<br>Message: ${text}`;
+      console.error("Server error:", response.status, text);
+      return;
     }
-    const html = await response.text();
 
-    // Simulate AI readiness score
-    const score = Math.floor(Math.random() * 100) + 1;
+    const result = await response.json();
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        scannedUrl: website,
-        score: score,
-        message: "AI readiness scan completed successfully",
-      }),
-    };
-  } catch (error) {
-    console.error("❌ SCAN FAILED", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: "Something went wrong on the server.",
-        details: error.message,
-      }),
-    };
+    if (result.success) {
+      document.getElementById("result-text").innerHTML = result.report || "✅ Scan complete.";
+      errorMessage.style.display = "none";
+    } else {
+      errorMessage.style.display = "block";
+      errorMessage.innerHTML = `❌ ${result.message || "Scan failed unexpectedly."}`;
+      console.error("Function error:", result);
+    }
+  } catch (err) {
+    loadingIndicator.style.display = "none";
+    resultsContainer.style.display = "block";
+    scannedUrlSpan.innerText = website;
+
+    errorMessage.style.display = "block";
+    errorMessage.innerHTML = `❌ Network or unexpected error.<br>${err.message}`;
+    console.error("Exception thrown:", err);
   }
-};
+});

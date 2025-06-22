@@ -56,6 +56,7 @@ Format the result clearly.
     };
   } catch (err) {
     console.error("Error:", err);
+    console.error("Error stack:", err.stack);  // << More detailed log
     return {
       statusCode: 500,
       body: JSON.stringify({

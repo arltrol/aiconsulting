@@ -45,3 +45,95 @@
       color: var(--dark);
     }
     input {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.5rem 0 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    label {
+      font-weight: 600;
+    }
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .result-box {
+      display: none;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: #fefefe;
+    }
+    ul {
+      padding-left: 1.3rem;
+    }
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <h1>AI Readiness Scan for Charities & SMEs</h1>
+    <p>Wondering how AI could help your organization? Enter your details below to get a free AI-readiness score and insights.</p>
+  </section>
+
+  <div class="container">
+    <form name="ai-scan" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/" onsubmit="handleScan(event)">
+      <input type="hidden" name="form-name" value="ai-scan" />
+      <p hidden>
+        <label>Don’t fill this out if you're human: <input name="bot-field" /></label>
+      </p>
+      <label>Your name:</label>
+      <input type="text" name="name" required />
+      <label>Email address:</label>
+      <input type="email" name="email" required />
+      <label>Charity or organization website:</label>
+      <input type="url" name="website" required />
+      <button type="submit">Run AI Scan</button>
+    </form>
+
+    <div class="result-box" id="result-box">
+      <h2>🔍 AI Readiness Score: 52/100</h2>
+      <p><strong>Observations:</strong></p>
+      <ul>
+        <li>📢 No blog content detected — low repurpose potential</li>
+        <li>🛍 Physical shop only — online automation opportunity</li>
+        <li>📬 Manual contact workflows — consider chatbot or email AI assistant</li>
+      </ul>
+      <p><strong>Top Recommendation:</strong><br>
+      Add an AI-powered newsletter tool to automatically turn updates into donor content.</p>
+      <p><em>Want a custom AI roadmap for your team?</em> <a href="https://calendly.com/roland2017/30min" target="_blank">Book a free session here</a>.</p>
+    </div>
+  </div>
+
+  <script>
+    function handleScan(event) {
+      event.preventDefault();
+      const form = event.target;
+      const data = new FormData(form);
+
+      fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(data).toString(),
+      })
+      .then(() => {
+        form.style.display = "none";
+        document.getElementById("result-box").style.display = "block";
+      })
+      .catch((error) => {
+        alert("Submission failed: " + error);
+      });
+    }
+  </script>
+</body>
+</html>

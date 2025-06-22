@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI-Readiness Scan | Your AI Consultant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
+      background: #f9f9f9;
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: #111;
+    }
+    form {
+      margin-top: 1rem;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 0.8rem;
+      margin: 0.5rem 0 1rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #0c8f8f;
+      color: white;
+      border: none;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #result-box {
+      display: none;
+      background: #fff;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Readiness Scan for Charities & SMEs</h1>
+  <p>Wondering how AI could help your organization? Enter your website below to get a free AI-readiness review in seconds.</p>
+
+  <form name="ai-scan" method="POST" data-netlify="true" onsubmit="handleScan(event)">
+    <input type="hidden" name="form-name" value="ai-scan" />
+    <label>Your name:</label>
+    <input type="text" name="name" placeholder="Jane Doe" required />
+    <label>Email address:</label>
+    <input type="email" name="email" placeholder="jane@example.org" required />
+    <label>Charity or organization website:</label>
+    <input type="url" name="website" placeholder="https://yourcharity.org.uk" required />
+    <button type="submit">Run AI Scan</button>
+  </form>
+
+  <div id="result-box">
+    <h2>🔍 AI Readiness Score: 52/100</h2>
+    <p><strong>Observations:</strong></p>
+    <ul>
+      <li>📢 No blog content detected — low repurpose potential</li>
+      <li>🛍 Physical shop only — online automation opportunity</li>
+      <li>📬 Manual contact workflows — consider chatbot or email AI assistant</li>
+    </ul>
+    <p><strong>Top Recommendation:</strong><br>
+    Add an AI-powered newsletter tool to automatically turn updates into donor content.</p>
+    <p><em>Want a custom AI roadmap for your team?</em> <a href="https://calendly.com/roland2017/30min" target="_blank">Book a free session here</a>.</p>
+  </div>
+
+  <script>
+    function handleScan(e) {
+      e.preventDefault();
+      document.querySelector("form").style.display = "none";
+      document.getElementById("result-box").style.display = "block";
+    }
+  </script>
+</body>
+</html>

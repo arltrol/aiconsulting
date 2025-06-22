@@ -50,8 +50,8 @@ Format the result clearly.
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        report: result,
         scanned: website,
+        report: result,
       }),
     };
   } catch (err) {

@@ -76,11 +76,20 @@
       background: #fefefe;
       white-space: pre-wrap;
     }
-    ul {
-      padding-left: 1.3rem;
+    .styled-report {
+      line-height: 1.6;
     }
-    a {
-      color: var(--primary);
+    .styled-report strong {
+      color: #0c8f8f;
+    }
+    .cta-button {
+      display: inline-block;
+      margin-top: 1.5rem;
+      background: #0c8f8f;
+      color: #fff;
+      padding: 0.9rem 1.5rem;
+      border-radius: 8px;
+      font-weight: bold;
       text-decoration: none;
     }
     footer {
@@ -92,9 +101,6 @@
     footer a {
       color: #00bcd4;
       text-decoration: underline;
-    }
-    footer p {
-      margin: 0.3rem 0;
     }
     .footer-inner {
       max-width: 800px;
@@ -114,15 +120,16 @@
       <input type="text" name="name" required />
       <label>Email address:</label>
       <input type="email" name="email" required />
-      <label>Enter your organisation website URL to scan:</label>
-      <input type="text" name="website" id="website-input" placeholder="https://example.org or aceofclubs.org.uk" required />
+      <label>Enter your organisation website:</label>
+      <input type="url" name="website" placeholder="https://example.org" required />
       <button type="submit">Run AI Scan</button>
     </form>
 
     <div class="result-box" id="result-box">
       <h2>🔍 AI Readiness Results</h2>
       <p><strong>Scanned website:</strong> <span id="scanned-url"></span></p>
-      <div id="scan-output"></div>
+      <div id="scan-output" class="styled-report"></div>
+      <a class="cta-button" href="https://calendly.com/roland2017/30min" target="_blank">📞 Schedule a Free AI Consultation</a>
     </div>
   </div>
 
@@ -137,41 +144,37 @@
   </footer>
 
   <script>
-    async function handleScan(event) {
-      event.preventDefault();
-      const form = document.getElementById('ai-scan-form');
-      const name = form.querySelector('input[name="name"]').value;
-      const email = form.querySelector('input[name="email"]').value;
-      let website = form.querySelector('input[name="website"]').value.trim();
-      if (!/^https?:\/\//i.test(website)) {
-        website = 'https://' + website;
+   async function handleScan(event) {
+    event.preventDefault();
+    const form = document.getElementById('ai-scan-form');
+    const name = form.querySelector('input[name="name"]').value;
+    const email = form.querySelector('input[name="email"]').value;
+    const website = form.querySelector('input[name="website"]').value;
+    const resultBox = document.getElementById('result-box');
+    const scanOutput = document.getElementById('scan-output');
+
+    document.getElementById('scanned-url').textContent = website;
+    resultBox.style.display = 'block';
+    scanOutput.innerHTML = '<p>⏳ Scanning website and generating insights…</p>';
+
+    try {
+      const response = await fetch('/.netlify/functions/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, website })
+      });
+
+      const data = await response.json();
+
+      if (data.report) {
+        scanOutput.innerHTML = `<div>${data.report.replace(/\n/g, '<br>')}</div>`;
+      } else {
+        scanOutput.innerHTML = `<p>❌ Something went wrong. ${data.error || ''}</p>`;
       }
-
-      const resultBox = document.getElementById('result-box');
-      const scanOutput = document.getElementById('scan-output');
-
-      document.getElementById('scanned-url').textContent = website;
-      resultBox.style.display = 'block';
-      scanOutput.innerHTML = '<p>⏳ Scanning website and generating insights…</p>';
-
-      try {
-        const response = await fetch('/.netlify/functions/scan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, website })
-        });
-
-        const data = await response.json();
-
-        if (data.report) {
-          scanOutput.innerHTML = `<div>${data.report.replace(/\n/g, '<br>')}</div>`;
-        } else {
-          scanOutput.innerHTML = `<p>❌ Something went wrong. ${data.error || ''}</p>`;
-        }
-      } catch (err) {
-        scanOutput.innerHTML = `<p>⚠️ Error: ${err.message}</p>`;
-      }
+    } catch (err) {
+      scanOutput.innerHTML = `<p>⚠️ Error: ${err.message}</p>`;
     }
+  }
   </script>
 </body>
 </html>

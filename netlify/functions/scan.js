@@ -1,11 +1,10 @@
 // netlify/functions/scan.js
 
-const { Configuration, OpenAIApi } = require("openai");
+const OpenAI = require("openai");
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
@@ -36,7 +35,7 @@ Include:
 Format the result clearly.
 `;
 
-    const response = await openai.createChatCompletion({
+    const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: "You are an AI strategy consultant." },
@@ -45,18 +44,19 @@ Format the result clearly.
       temperature: 0.7,
     });
 
-    const result = response.data.choices[0].message.content;
+    const result = response.choices[0].message.content;
 
     return {
       statusCode: 200,
       body: JSON.stringify({
+        success: true,
+        report: result,
         scanned: website,
-        result,
       }),
     };
   } catch (err) {
     console.error("Error:", err);
-    console.error("Error stack:", err.stack);  // << More detailed log
+    console.error("Error stack:", err.stack);
     return {
       statusCode: 500,
       body: JSON.stringify({

@@ -25,14 +25,18 @@ exports.handler = async function (event) {
       };
     }
 
+    // Generate the report
     const prompt = `
-You are an expert AI consultant. Based on the public-facing website at ${website}, generate a concise but insightful 'AI Readiness Report' aimed at non-technical leadership. 
+You are an expert AI consultant. Based only on the public-facing website at ${website}, generate a concise 'AI Readiness Report' aimed at non-technical leadership. 
+
 Include:
-- Potential AI use cases
-- Digital maturity
-- Key risks or blockers
-- Overall recommendation
-Format the result clearly.
+1. A readiness score out of 100
+2. Potential AI use cases
+3. Digital maturity
+4. Key risks or blockers
+5. Overall recommendation
+
+Format it with clear section titles and bullet points.
 `;
 
     const response = await openai.chat.completions.create({
@@ -44,7 +48,12 @@ Format the result clearly.
       temperature: 0.7,
     });
 
-    const result = response.choices[0].message.content;
+    const resultMarkdown = response.choices[0].message.content;
+
+    // Convert Markdown to basic HTML for rendering
+    const result = resultMarkdown
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold
+      .replace(/\n/g, "<br>"); // line breaks
 
     return {
       statusCode: 200,

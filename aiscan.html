@@ -87,16 +87,19 @@
   </section>
 
   <div class="container">
-    <form name="ai-scan" method="POST" data-netlify="true" onsubmit="handleScan(event)">
-      <input type="hidden" name="form-name" value="ai-scan" />
-      <label>Your name:</label>
-      <input type="text" name="name" placeholder="Jane Doe" required />
-      <label>Email address:</label>
-      <input type="email" name="email" placeholder="jane@example.org" required />
-      <label>Charity or organization website:</label>
-      <input type="url" name="website" placeholder="https://yourcharity.org.uk" required />
-      <button type="submit">Run AI Scan</button>
-    </form>
+<form name="ai-scan" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="?" onsubmit="handleScan(event)">
+  <input type="hidden" name="form-name" value="ai-scan" />
+  <p hidden>
+    <label>Don’t fill this out if you're human: <input name="bot-field" /></label>
+  </p>
+  <label>Your name:</label>
+  <input type="text" name="name" required />
+  <label>Email address:</label>
+  <input type="email" name="email" required />
+  <label>Charity or organization website:</label>
+  <input type="url" name="website" required />
+  <button type="submit">Run AI Scan</button>
+</form>
 
     <div class="result-box" id="result-box">
       <h2>🔍 AI Readiness Score: 52/100</h2>

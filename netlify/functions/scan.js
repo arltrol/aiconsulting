@@ -1,56 +1,64 @@
-// netlify/functions/scan.js
 const fetch = require("node-fetch");
+const { Configuration, OpenAIApi } = require("openai");
 
-exports.handler = async function (event, context) {
-  const { website } = JSON.parse(event.body || "{}");
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
 
-  // Ensure proper URL format
-  let validUrl = website.trim();
-  if (!validUrl.startsWith("http://") && !validUrl.startsWith("https://")) {
-    validUrl = "https://" + validUrl;
-  }
-
+exports.handler = async function (event) {
   try {
-    // Attempt to fetch the site’s homepage HTML
-    const res = await fetch(validUrl);
-    const html = await res.text();
+    const { url } = JSON.parse(event.body || '{}');
 
-    // Simple checks for AI-readiness indicators
-    const observations = [];
-
-    if (!html.includes("blog")) {
-      observations.push("📢 No blog or article content detected — low repurpose potential");
-    }
-    if (html.includes("shop") || html.includes("store")) {
-      observations.push("🛍 Website has physical product mentions — automation opportunity");
-    }
-    if (html.includes("mailto:")) {
-      observations.push("📬 Manual contact email detected — consider a chatbot or contact form assistant");
+    if (!url) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Missing website URL" }),
+      };
     }
 
-    if (observations.length === 0) {
-      observations.push("✅ Basic digital presence detected. Consider audit for next steps.");
+    // 🔧 Clean + validate input URL
+    const cleanUrl = url.startsWith("http") ? url.trim() : `https://${url.trim()}`;
+    let pageContent = "";
+
+    try {
+      const response = await fetch(cleanUrl);
+      if (!response.ok) throw new Error(`Failed to fetch ${cleanUrl}: ${response.status}`);
+      pageContent = await response.text();
+    } catch (err) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: `Could not load website: ${err.message}` }),
+      };
     }
 
-    const score = 45 + Math.floor(Math.random() * 30); // Simulate score
+    // 🧠 Call OpenAI with scraped content
+    const gptPrompt = `
+      A charity website says:
+      ---
+      ${pageContent.slice(0, 4000)}
+      ---
+      Based on this, what 3 ways could this organization use AI to increase impact or reduce admin? Be specific and use plain English.
+    `;
+
+    const aiResponse = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      temperature: 0.7,
+      messages: [{ role: "user", content: gptPrompt }],
+    });
+
+    const resultText = aiResponse?.data?.choices?.[0]?.message?.content || "No result from AI.";
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        url: validUrl,
-        score,
-        observations,
-        recommendation:
-          "Consider adding an AI-powered newsletter or chatbot to increase engagement and efficiency.",
-      }),
+      body: JSON.stringify({ result: resultText }),
     };
+
   } catch (err) {
-    console.error("Scan failed", err);
+    console.error("❌ Server error:", err);
     return {
-      statusCode: 400,
-      body: JSON.stringify({
-        error: "Invalid URL or site could not be fetched.",
-      }),
+      statusCode: 500,
+      body: JSON.stringify({ error: "Server error: " + err.message }),
     };
   }
 };

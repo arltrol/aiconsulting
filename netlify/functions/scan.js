@@ -1,69 +1,84 @@
-// netlify/functions/scan.js
-
 const fetch = require('node-fetch');
-const cheerio = require('cheerio');
 
 exports.handler = async (event) => {
   try {
-    const { website } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    let urlInput = body.website.trim();
 
-    if (!website || !/^https?:\/\/.+\..+/.test(website)) {
+    // Add https:// if missing
+    let fullUrl = urlInput.startsWith('http') ? urlInput : `https://${urlInput}`;
+
+    // Validate URL
+    try {
+      new URL(fullUrl);
+    } catch (err) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Invalid website URL' }),
+        body: JSON.stringify({ error: 'Invalid website URL' })
       };
     }
 
-    // Fetch live website content
-    const res = await fetch(website);
+    // Fetch website content
+    const res = await fetch(fullUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0'
+      }
+    });
     const html = await res.text();
 
-    // Extract visible text with cheerio
-    const $ = cheerio.load(html);
-    const text = $('body').text().replace(/\s+/g, ' ').trim().slice(0, 4000); // limit to ~4k chars
+    // Clean up content
+    const textContent = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').slice(0, 3000);
 
+    // Prepare OpenAI API request
     const prompt = `
-You are an AI consultant for charities. A user entered their organization website: ${website}.
+You are an AI consultant. Based on the following scraped website content, provide:
 
-Here’s the visible homepage text:
----
-${text}
----
+1. AI Readiness Score out of 100
+2. 3–4 observations
+3. 1 top recommendation
 
-Based on this, give them:
-1. An AI Readiness Score (0–100)
-2. 2–3 observations on how ready they are to use AI (e.g., online content, contact workflows, donation tools)
-3. 1 AI recommendation to improve
-Be concise and helpful.`;
+Be concise. Write in a tone suitable for charities or SMEs.
 
-    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+--- Website Content ---
+${textContent}
+`;
 
-    const gptRes = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-      }),
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: "You are a helpful AI consultant." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.5
+      })
     });
 
-    const gptJson = await gptRes.json();
-    const reply = gptJson.choices[0].message.content;
+    const data = await response.json();
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ reply }),
-    };
+    if (data.choices && data.choices[0]) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          result: data.choices[0].message.content.trim()
+        })
+      };
+    } else {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "OpenAI response was invalid." })
+      };
+    }
 
   } catch (err) {
-    console.error('Scan error:', err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Something went wrong.' }),
+      body: JSON.stringify({ error: err.message || "Unknown error" })
     };
   }
 };

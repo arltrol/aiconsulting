@@ -74,6 +74,7 @@
       border: 1px solid #ddd;
       border-radius: 10px;
       background: #fefefe;
+      white-space: pre-wrap;
     }
     ul {
       padding-left: 1.3rem;
@@ -108,11 +109,7 @@
   </section>
 
   <div class="container">
-    <form name="ai-scan" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/" onsubmit="handleScan(event)">
-      <input type="hidden" name="form-name" value="ai-scan" />
-      <p hidden>
-        <label>Don’t fill this out if you're human: <input name="bot-field" /></label>
-      </p>
+    <form id="ai-scan-form" onsubmit="handleScan(event)">
       <label>Your name:</label>
       <input type="text" name="name" required />
       <label>Email address:</label>
@@ -123,17 +120,9 @@
     </form>
 
     <div class="result-box" id="result-box">
-      <h2>🔍 AI Readiness Score: 52/100</h2>
+      <h2>🔍 AI Readiness Results</h2>
       <p><strong>Scanned website:</strong> <span id="scanned-url"></span></p>
-      <p><strong>Observations:</strong></p>
-      <ul>
-        <li>📢 No blog content detected — low repurpose potential</li>
-        <li>🛍 Physical shop only — online automation opportunity</li>
-        <li>📬 Manual contact workflows — consider chatbot or email AI assistant</li>
-      </ul>
-      <p><strong>Top Recommendation:</strong><br>
-      Add an AI-powered newsletter tool to automatically turn updates into donor content.</p>
-      <p><em>Want a custom AI roadmap for your team?</em> <a href="https://calendly.com/roland2017/30min" target="_blank">Book a free session here</a>.</p>
+      <div id="scan-output"></div>
     </div>
   </div>
 
@@ -148,25 +137,36 @@
   </footer>
 
   <script>
-    function handleScan(event) {
+    async function handleScan(event) {
       event.preventDefault();
-      const form = event.target;
-      const data = new FormData(form);
-      const scannedUrl = form.querySelector("#website-input").value;
-      document.getElementById("scanned-url").textContent = scannedUrl;
+      const form = document.getElementById('ai-scan-form');
+      const name = form.querySelector('input[name="name"]').value;
+      const email = form.querySelector('input[name="email"]').value;
+      const website = form.querySelector('input[name="website"]').value;
+      const resultBox = document.getElementById('result-box');
+      const scanOutput = document.getElementById('scan-output');
 
-      fetch("/", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(data).toString(),
-      })
-      .then(() => {
-        form.style.display = "none";
-        document.getElementById("result-box").style.display = "block";
-      })
-      .catch((error) => {
-        alert("Submission failed: " + error);
-      });
+      document.getElementById('scanned-url').textContent = website;
+      resultBox.style.display = 'block';
+      scanOutput.innerHTML = '<p>⏳ Scanning website and generating insights…</p>';
+
+      try {
+        const response = await fetch('/.netlify/functions/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ website })
+        });
+
+        const data = await response.json();
+
+        if (data.reply) {
+          scanOutput.innerHTML = `<div>${data.reply.replace(/\n/g, '<br>')}</div>`;
+        } else {
+          scanOutput.innerHTML = `<p>❌ Something went wrong. ${data.error || ''}</p>`;
+        }
+      } catch (err) {
+        scanOutput.innerHTML = `<p>⚠️ Error: ${err.message}</p>`;
+      }
     }
   </script>
 </body>

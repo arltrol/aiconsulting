@@ -1,5 +1,6 @@
+// netlify/functions/scan.js
+
 const OpenAI = require("openai");
-const nodemailer = require("nodemailer");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -15,7 +16,7 @@ exports.handler = async function (event) {
 
   try {
     const body = JSON.parse(event.body || '{}');
-    let { website, name, email } = body;
+    const { website, name, email } = body;
 
     if (!website || !name || !email) {
       return {
@@ -24,21 +25,18 @@ exports.handler = async function (event) {
       };
     }
 
-    // Normalize website input
-    if (!website.startsWith("http")) {
-      website = `https://${website}`;
-    }
-
-    // Create prompt
+    // Generate the report
     const prompt = `
-You are an expert AI consultant. Based on the public-facing website at ${website}, generate a concise but insightful 'AI Readiness Report' aimed at non-technical leadership. 
+You are an expert AI consultant. Based only on the public-facing website at ${website}, generate a concise 'AI Readiness Report' aimed at non-technical leadership. 
+
 Include:
-1. AI Readiness Score out of 100 (briefly justify)
-2. Potential AI Use Cases
-3. Digital Maturity observations
+1. A readiness score out of 100
+2. Potential AI use cases
+3. Digital maturity
 4. Key risks or blockers
-5. Short-Term, Medium-Term, and Long-Term recommendations
-Respond with markdown formatting. Keep the tone professional but friendly.
+5. Overall recommendation
+
+Format it with clear section titles and bullet points.
 `;
 
     const response = await openai.chat.completions.create({
@@ -50,25 +48,12 @@ Respond with markdown formatting. Keep the tone professional but friendly.
       temperature: 0.7,
     });
 
-    const result = response.choices[0].message.content;
+    const resultMarkdown = response.choices[0].message.content;
 
-    // Email Roland with notification
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.NOTIFY_EMAIL,
-        pass: process.env.NOTIFY_PASS,
-      },
-    });
-
-    const mailOptions = {
-      from: `"AI Scan Bot" <${process.env.NOTIFY_EMAIL}>`,
-      to: "roland.arlt@gmail.com",
-      subject: `✅ New AI Scan: ${name}`,
-      text: `Name: ${name}\nEmail: ${email}\nWebsite: ${website}\n\n---\n\n${result}`,
-    };
-
-    await transporter.sendMail(mailOptions);
+    // Convert Markdown to basic HTML for rendering
+    const result = resultMarkdown
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold
+      .replace(/\n/g, "<br>"); // line breaks
 
     return {
       statusCode: 200,
@@ -80,6 +65,7 @@ Respond with markdown formatting. Keep the tone professional but friendly.
     };
   } catch (err) {
     console.error("Error:", err);
+    console.error("Error stack:", err.stack);
     return {
       statusCode: 500,
       body: JSON.stringify({

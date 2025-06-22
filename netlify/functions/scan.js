@@ -1,53 +1,67 @@
-document.getElementById("scan-form").addEventListener("submit", async function (e) {
-  e.preventDefault();
+// netlify/functions/scan.js
 
-  const email = document.getElementById("email").value;
-  const website = document.getElementById("website").value;
-  const resultsContainer = document.getElementById("scan-results");
-  const scannedUrlSpan = document.getElementById("scanned-url");
-  const errorMessage = document.getElementById("error-message");
-  const loadingIndicator = document.getElementById("loading-indicator");
+const { Configuration, OpenAIApi } = require("openai");
 
-  resultsContainer.style.display = "none";
-  errorMessage.style.display = "none";
-  loadingIndicator.style.display = "block";
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+exports.handler = async function (event) {
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method Not Allowed" }),
+    };
+  }
 
   try {
-    const response = await fetch("/.netlify/functions/scan", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, website })
+    const body = JSON.parse(event.body || '{}');
+    const { website, name, email } = body;
+
+    if (!website || !name || !email) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Missing website, name, or email" }),
+      };
+    }
+
+    const prompt = `
+You are an expert AI consultant. Based on the public-facing website at ${website}, generate a concise but insightful 'AI Readiness Report' aimed at non-technical leadership. 
+Include:
+- Potential AI use cases
+- Digital maturity
+- Key risks or blockers
+- Overall recommendation
+Format the result clearly.
+`;
+
+    const response = await openai.createChatCompletion({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: "You are an AI strategy consultant." },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.7,
     });
 
-    loadingIndicator.style.display = "none";
-    resultsContainer.style.display = "block";
-    scannedUrlSpan.innerText = website;
+    const result = response.data.choices[0].message.content;
 
-    if (!response.ok) {
-      const text = await response.text();
-      errorMessage.style.display = "block";
-      errorMessage.innerHTML = `❌ Something went wrong.<br>Status: ${response.status}<br>Message: ${text}`;
-      console.error("Server error:", response.status, text);
-      return;
-    }
-
-    const result = await response.json();
-
-    if (result.success) {
-      document.getElementById("result-text").innerHTML = result.report || "✅ Scan complete.";
-      errorMessage.style.display = "none";
-    } else {
-      errorMessage.style.display = "block";
-      errorMessage.innerHTML = `❌ ${result.message || "Scan failed unexpectedly."}`;
-      console.error("Function error:", result);
-    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        scanned: website,
+        result,
+      }),
+    };
   } catch (err) {
-    loadingIndicator.style.display = "none";
-    resultsContainer.style.display = "block";
-    scannedUrlSpan.innerText = website;
-
-    errorMessage.style.display = "block";
-    errorMessage.innerHTML = `❌ Network or unexpected error.<br>${err.message}`;
-    console.error("Exception thrown:", err);
+    console.error("Error:", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Something went wrong",
+        details: err.message,
+      }),
+    };
   }
-});
+};

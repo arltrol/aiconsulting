@@ -16,6 +16,9 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--dark);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     .hero {
       background: #000;
@@ -38,6 +41,7 @@
       background: var(--light);
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      flex-grow: 1;
     }
     h2 {
       font-size: 1.6rem;
@@ -78,6 +82,23 @@
       color: var(--primary);
       text-decoration: none;
     }
+    footer {
+      background: #0c0c0c;
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    footer a {
+      color: #00bcd4;
+      text-decoration: underline;
+    }
+    footer p {
+      margin: 0.3rem 0;
+    }
+    .footer-inner {
+      max-width: 800px;
+      margin: auto;
+    }
   </style>
 </head>
 <body>
@@ -97,7 +118,7 @@
       <label>Email address:</label>
       <input type="email" name="email" required />
       <label>Charity or organization website:</label>
-      <input type="text" name="website" pattern=".*\..*" placeholder="https://example.org or yourwebsite.org.uk" required />
+      <input type="url" name="website" placeholder="https://example.org" required />
       <button type="submit">Run AI Scan</button>
     </form>
 
@@ -114,6 +135,16 @@
       <p><em>Want a custom AI roadmap for your team?</em> <a href="https://calendly.com/roland2017/30min" target="_blank">Book a free session here</a>.</p>
     </div>
   </div>
+
+  <footer>
+    <div class="footer-inner">
+      <h3>Get in Touch</h3>
+      <p>Email: <a href="mailto:team@youraiconsultant.london">team@youraiconsultant.london</a></p>
+      <p>Schedule a call: <a href="https://calendly.com/roland2017/30min" target="_blank">Calendly Link &gt;</a></p>
+      <p>Read our latest insights: <a href="/blog">Visit Our Blog</a></p>
+      <p style="margin-top:1rem;">© 2025 AI Strategy Consulting for SMEs and Non-Profits. All rights reserved.</p>
+    </div>
+  </footer>
 
   <script>
     function handleScan(event) {

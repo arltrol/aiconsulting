@@ -114,35 +114,24 @@
     <p>Wondering how AI could help your organization? Enter your details below to get a free AI-readiness score and insights.</p>
   </section>
 
- <div class="container">
-  <form id="ai-scan-form" onsubmit="handleScan(event)">
-    <input type="hidden" name="form-name" value="netlify-scan" />
-    <input type="hidden" name="bot-field" />
+  <div class="container">
+    <form id="ai-scan-form" onsubmit="handleScan(event)">
+      <label>Your name:</label>
+      <input type="text" name="name" required />
+      <label>Email address:</label>
+      <input type="email" name="email" required />
+      <label>Enter your organisation website:</label>
+      <input type="url" name="website" placeholder="https://example.org" required />
+      <button type="submit">Run AI Scan</button>
+    </form>
 
-    <label>Your name:</label>
-    <input type="text" name="name" required />
-    <label>Email address:</label>
-    <input type="email" name="email" required />
-    <label>Enter your organisation website / URL:</label>
-    <input type="url" name="website" placeholder="https://example.org" required />
-    <button type="submit">Run AI Scan</button>
-  </form>
-
-  <!-- Hidden form for Netlify to trigger email notification -->
-  <form name="netlify-scan" netlify netlify-honeypot="bot-field" hidden>
-    <input type="text" name="name" />
-    <input type="email" name="email" />
-    <input type="url" name="website" />
-  </form>
-
-   <div class="result-box" id="result-box">
-  <h2>🔍 AI Readiness Results</h2>
-  <p><strong>Scanned website:</strong> <span id="scanned-url"></span></p>
-  <div id="scan-output" class="styled-report"></div>
-  <a class="cta-button" href="https://calendly.com/roland2017/30min" target="_blank">
-    📞 Schedule a Free AI Consultation
-  </a>
-</div>
+    <div class="result-box" id="result-box">
+      <h2>🔍 AI Readiness Results</h2>
+      <p><strong>Scanned website:</strong> <span id="scanned-url"></span></p>
+      <div id="scan-output" class="styled-report"></div>
+      <a class="cta-button" href="https://calendly.com/roland2017/30min" target="_blank">📞 Schedule a Free AI Consultation</a>
+    </div>
+  </div>
 
   <footer>
     <div class="footer-inner">
@@ -178,12 +167,12 @@
       const data = await response.json();
 
       if (data.report) {
-        scanOutput.innerHTML = `<div>${data.report.replace(/\n/g, '<br>')}</div>`;
+        scanOutput.innerHTML = <div>${data.report.replace(/\n/g, '<br>')}</div>;
       } else {
-        scanOutput.innerHTML = `<p>❌ Something went wrong. ${data.error || ''}</p>`;
+        scanOutput.innerHTML = <p>❌ Something went wrong. ${data.error || ''}</p>;
       }
     } catch (err) {
-      scanOutput.innerHTML = `<p>⚠️ Error: ${err.message}</p>`;
+      scanOutput.innerHTML = <p>⚠️ Error: ${err.message}</p>;
     }
   }
   </script>

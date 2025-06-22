@@ -1,84 +1,61 @@
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
 
-exports.handler = async (event) => {
+exports.handler = async function (event) {
   try {
-    const body = JSON.parse(event.body);
-    let urlInput = body.website.trim();
+    const { website } = JSON.parse(event.body || "{}");
 
-    // Add https:// if missing
-    let fullUrl = urlInput.startsWith('http') ? urlInput : `https://${urlInput}`;
-
-    // Validate URL
-    try {
-      new URL(fullUrl);
-    } catch (err) {
+    if (!website || !website.includes(".")) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Invalid website URL' })
+        body: JSON.stringify({ error: "Invalid website URL" }),
       };
     }
 
-    // Fetch website content
-    const res = await fetch(fullUrl, {
+    const fullUrl = website.startsWith("http") ? website : `https://${website}`;
+
+    // Fetch live website content
+    const response = await fetch(fullUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0'
-      }
-    });
-    const html = await res.text();
-
-    // Clean up content
-    const textContent = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').slice(0, 3000);
-
-    // Prepare OpenAI API request
-    const prompt = `
-You are an AI consultant. Based on the following scraped website content, provide:
-
-1. AI Readiness Score out of 100
-2. 3–4 observations
-3. 1 top recommendation
-
-Be concise. Write in a tone suitable for charities or SMEs.
-
---- Website Content ---
-${textContent}
-`;
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
+        "User-Agent": "Mozilla/5.0 (AI Readiness Bot)",
       },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          { role: "system", content: "You are a helpful AI consultant." },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.5
-      })
     });
 
-    const data = await response.json();
-
-    if (data.choices && data.choices[0]) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          result: data.choices[0].message.content.trim()
-        })
-      };
-    } else {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: "OpenAI response was invalid." })
-      };
+    if (!response.ok) {
+      throw new Error(`Failed to fetch website: ${response.status} ${response.statusText}`);
     }
 
+    const html = await response.text();
+
+    // Simple keyword checks (could be made smarter)
+    const hasBlog = html.includes("/blog") || html.includes("blog-post");
+    const hasNewsletter = html.includes("newsletter") || html.includes("mailchimp");
+    const hasShop = html.includes("/shop") || html.includes("add-to-cart");
+    const hasForms = html.includes("<form") && html.includes("contact");
+
+    const score = 50 + (hasBlog ? 10 : 0) + (hasNewsletter ? 10 : 0) + (hasForms ? 10 : 0);
+
+    const observations = [];
+
+    if (!hasBlog) observations.push("📢 No blog content detected — low repurpose potential");
+    if (!hasShop) observations.push("🛍 Physical shop only — online automation opportunity");
+    if (!hasForms) observations.push("📬 Manual contact workflows — consider chatbot or AI assistant");
+
+    const recommendation = "Add an AI-powered newsletter or chatbot to automate donor engagement.";
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        url: website,
+        score,
+        observations,
+        recommendation,
+      }),
+    };
   } catch (err) {
+    console.error("Function error:", err); // Netlify will log this
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message || "Unknown error" })
+      body: JSON.stringify({ error: err.message || "Unknown error" }),
     };
   }
 };

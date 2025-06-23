@@ -34,8 +34,8 @@ Return ONLY a JSON object like this:
 }
 
 Follow these instructions:
-- Score (0–100): Based on digital maturity, security, integrations, and content structure.
-- useCases: 2 practical, non-technical AI use cases tailored to this charity or SME (e.g. donor insights, process automation, FAQ bots).
+- Score (0–100): Based on digital maturity, security, integrations, and content structure. Score should be on lower / conservative side to reflect upside potential. 
+- useCases: 3 practical, non-technical AI use cases tailored to this charity or SME (e.g. donor insights, process automation, FAQ bots).
 - techReadiness:
   • Always include 3 technical observations or suggestions — make them actionable.
   • Mention specific AI tools (e.g. GPT-4o, Whisper, Zapier, Make, Claude, OCR, chatbots).

@@ -19,8 +19,9 @@ exports.handler = async function (event) {
       };
     }
 
-    const systemPrompt = You are a professional AI strategy consultant helping small charities and SMEs.;
-    const userPrompt = 
+     const systemPrompt = "You are a professional AI strategy consultant helping small charities and SMEs.";
+
+const userPrompt = `
 The client has submitted their website: ${website}
 
 Your job is to analyze their AI readiness and return a JSON object like this:
@@ -40,7 +41,9 @@ Instructions:
 End with this message as a CTA:
 "If you'd like to explore how to apply these ideas or see AI in action, book a free 30-min strategy call: https://calendly.com/roland2017/30min"
 
-Return only valid JSON — no other text.;
+Return only valid JSON — no other text.
+`;
+
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo", // or fallback to gpt-3.5-turbo if needed

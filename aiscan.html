@@ -263,7 +263,7 @@ ul {
         website = 'https://' + website;
       }
 
-      document.getElementById('scanned-url').textContent = website;
+      
       const resultBox = document.getElementById('result-box');
       document.getElementById('readiness-score').textContent = '--';
       document.getElementById('use-cases').innerHTML = '<li>Scanning website and generating insights...</li>';
@@ -292,7 +292,7 @@ ul {
 
         const data = await response.json();
         if (data.report) {
-          document.getElementById('result-box').innerHTML = `
+  const resultHTML = `
   <div class="results-card">
     <h2>🧠 AI Readiness Results</h2>
     <p><strong>Scanned website:</strong> <a href="${website}" target="_blank">${website}</a></p>
@@ -323,7 +323,15 @@ ul {
     </div>
   </div>
 `;
-          setTimeout(() => document.getElementById('result-box').classList.add('visible'), 30);
+            document.getElementById('result-box').innerHTML = resultHTML;
+  setTimeout(() => {
+    document.getElementById('result-box').classList.add('visible');
+    // (Optional) update scanned-url text if you want to override it
+    const scannedURL = document.getElementById('scanned-url');
+    if (scannedURL) scannedURL.textContent = website;
+  }, 30);
+}
+          
 
 
         } else {

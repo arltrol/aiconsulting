@@ -211,35 +211,7 @@ ul {
       <input type="text" name="bot-field" />
     </form>
 
-    <div class="result-box" id="result-box">
-      <div class="result-card">
-  <h2><i class="fas fa-search"></i> AI Readiness Results</h2>
-  <p><strong>Scanned website:</strong> <span id="scanned-url"></span></p>
-
-  <div class="section">
-    <h3><i class="fas fa-chart-line"></i> Readiness Score</h3>
-    <p class="score" id="readiness-score">--/100</p>
-  </div>
-
-  <div class="section">
-    <h3><i class="fas fa-lightbulb"></i> Potential AI Use Cases</h3>
-    <ul id="use-cases"></ul>
-  </div>
-
-  <div class="section">
-    <h3><i class="fas fa-cogs"></i> Technical AI Readiness</h3>
-    <ul id="tech-readiness"></ul>
-  </div>
-
-  <div class="section">
-    <h3><i class="fas fa-arrow-circle-right"></i> Next Steps</h3>
-    <p>Want to explore your results with an expert or see how to take the next step? Book a free 30-minute call to discuss your AI opportunities.</p>
-    <a class="cta-button" href="https://calendly.com/roland2017/30min" target="_blank">📞 Book Your Free 30-Minute AI Strategy Session</a>
-  </div>
-</div>
-
-    </div>
-  </div>
+   <div class="result-box" id="result-box"></div>
 
   <footer>
     <div class="footer-inner">
@@ -264,9 +236,6 @@ ul {
     }
 
     const resultBox = document.getElementById('result-box');
-    
-    document.getElementById('use-cases').innerHTML = '<li>Scanning website and generating insights...</li>';
-    document.getElementById('tech-readiness').innerHTML = '';
 
     // Submit Netlify form behind the scenes
     const netlifyFormData = new FormData();
@@ -326,8 +295,7 @@ ul {
         document.getElementById('result-box').innerHTML = resultHTML;
         setTimeout(() => {
           document.getElementById('result-box').classList.add('visible');
-          const scannedURL = document.getElementById('scanned-url');
-          if (scannedURL) scannedURL.textContent = website;
+         
         }, 30);
       } else {
         throw new Error(data.error || 'Report generation failed.');

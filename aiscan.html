@@ -83,16 +83,7 @@
     .styled-report strong {
       color: #0c8f8f;
     }
-    .cta-button {
-      display: inline-block;
-      margin-top: 1.5rem;
-      background: #0c8f8f;
-      color: #fff;
-      padding: 0.9rem 1.5rem;
-      border-radius: 8px;
-      font-weight: bold;
-      text-decoration: none;
-    }
+    
     footer {
       background: #0c0c0c;
       color: white;
@@ -154,6 +145,44 @@
 .cta-button:hover {
   background-color: #005f6b;
 }
+    .results-card {
+  background: #fff;
+  padding: 2em;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  margin-top: 30px;
+}
+.score-number {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: teal;
+}
+ul {
+  padding-left: 1.5em;
+}
+.cta-box {
+  margin-top: 2em;
+  background: #f0f8ff;
+  padding: 1em;
+  border-left: 4px solid #0077cc;
+}
+.cta-button {
+  display: inline-block;
+  margin-top: 1em;
+  padding: 0.6em 1.2em;
+  background-color: #0077cc;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+.result-box {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.result-box.visible {
+  opacity: 1;
+}
+
 
   </style>
 </head>
@@ -239,9 +268,7 @@
       document.getElementById('readiness-score').textContent = '--';
       document.getElementById('use-cases').innerHTML = '<li>Scanning website and generating insights...</li>';
       document.getElementById('tech-readiness').innerHTML = '';
-      resultBox.style.display = 'block';
-
-
+      
       // Submit Netlify form behind the scenes
       const netlifyFormData = new FormData();
       netlifyFormData.append('form-name', 'netlify-scan');
@@ -265,17 +292,64 @@
 
         const data = await response.json();
         if (data.report) {
-          document.getElementById('readiness-score').textContent = data.score || '--';
-          document.getElementById('use-cases').innerHTML = (data.useCases || [])
-          .map(item => `<li>${item}</li>`).join('');
-          document.getElementById('tech-readiness').innerHTML = (data.techReadiness || [])
-          .map(item => `<li>${item}</li>`).join('');
+          document.getElementById('result-box').innerHTML = `
+  <div class="results-card">
+    <h2>🧠 AI Readiness Results</h2>
+    <p><strong>Scanned website:</strong> <a href="${website}" target="_blank">${website}</a></p>
+
+    <div class="score-section">
+      <h3>📊 Readiness Score</h3>
+      <p class="score-number">${data.score || '--'}/100</p>
+    </div>
+
+    <div class="usecases-section">
+      <h3>💡 Potential AI Use Cases</h3>
+      <ul>
+        ${(data.useCases || []).map(item => `<li>${item}</li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="tech-section">
+      <h3>🧪 Technical AI Readiness</h3>
+      <ul>
+        ${(data.techReadiness || []).map(item => `<li>${item}</li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="cta-box">
+      <h3>✅ Next Steps</h3>
+      <p>If you'd like to explore how to apply these ideas or see AI in action, book a free 30-min strategy call:</p>
+      <a class="cta-button" href="https://calendly.com/roland2017/30min" target="_blank">📅 Book Your Free 30-Minute AI Strategy Session</a>
+    </div>
+  </div>
+`;
+          setTimeout(() => document.getElementById('result-box').classList.add('visible'), 30);
+
 
         } else {
-          document.getElementById('use-cases').innerHTML = `<li>❌ Something went wrong. ${data.error || ''}</li>`;
+          document.getElementById('result-box').innerHTML = `
+  <div class="results-card">
+    <h2>⚠️ Error Generating AI Report</h2>
+    <p>Sorry, something went wrong generating your results.</p>
+    <p>${data.error || 'Please try again later or contact us directly.'}</p>
+  </div>
+`;
+            setTimeout(() => document.getElementById('result-box').classList.add('visible'), 30);
+
+
+          
         }
       } catch (err) {
-        document.getElementById('use-cases').innerHTML = `<li>⚠️ Error: ${err.message}</li>`;
+        document.getElementById('result-box').innerHTML = `
+  <div class="results-card">
+    <h2>⚠️ Error Reaching AI Engine</h2>
+    <p>${err.message}</p>
+    <p>Please try again later.</p>
+  </div>
+`;
+          setTimeout(() => document.getElementById('result-box').classList.add('visible'), 30);
+
+
       }
     }
   </script>

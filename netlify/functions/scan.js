@@ -27,16 +27,25 @@ exports.handler = async function (event) {
 
     // Generate the report
     const prompt = `
-You are an expert AI consultant. Based only on the public-facing website at ${website}, generate a concise 'AI Readiness Report' aimed at non-technical leadership. 
+ou are an AI consultant. A charity or small business has just entered their website URL: ${website}
 
-Include:
-1. A readiness score out of 100
-2. Potential AI use cases
-3. Digital maturity
-4. Key risks or blockers
-5. Overall recommendation
+Your job is to give them a quick AI Readiness Snapshot based on what you can infer from their site.
 
-Format it with clear section titles and bullet points.
+First, provide a score out of 100 for how ready they appear to be for adopting AI in their organization (based on digital maturity, online presence, etc). Be realistic, not too generous.
+
+Then, write a section with specific, practical AI use cases they could consider — especially related to their sector (charity, nonprofit, local business, etc). These should be actionable and understandable to non-technical users.
+
+Finally, add a new section called “Technical AI Readiness” that gives:
+- 2–3 quick observations about their website's technical potential for AI integration
+- Mention tools, models, or APIs they might benefit from (e.g., Zapier, GPT-4o, OCR, Make.com)
+- Note any limitations (e.g. if the site is basic/static, or lacks SSL, CRM etc)
+
+Write clearly and professionally, using bullet points or markdown style. Keep it to about 250–300 words.
+
++ "\n\n" +
+"If you'd like to discuss your results or explore how to take the next step with AI, our team is happy to help. Book a free consultation to get tailored guidance based on your goals and tech stack."
+
+
 `;
 
     const response = await openai.chat.completions.create({

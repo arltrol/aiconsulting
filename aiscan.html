@@ -252,47 +252,47 @@ ul {
   </footer>
 
   <script>
-    async function handleScan(event) {
-      event.preventDefault();
-      const form = document.getElementById('ai-scan-form');
-      const name = form.querySelector('input[name="name"]').value.trim();
-      const email = form.querySelector('input[name="email"]').value.trim();
-      let website = form.querySelector('input[name="website"]').value.trim();
+  async function handleScan(event) {
+    event.preventDefault();
+    const form = document.getElementById('ai-scan-form');
+    const name = form.querySelector('input[name="name"]').value.trim();
+    const email = form.querySelector('input[name="email"]').value.trim();
+    let website = form.querySelector('input[name="website"]').value.trim();
 
-      if (!website.startsWith('http')) {
-        website = 'https://' + website;
-      }
+    if (!website.startsWith('http')) {
+      website = 'https://' + website;
+    }
 
-      
-      const resultBox = document.getElementById('result-box');
-      document.getElementById('readiness-score').textContent = '--';
-      document.getElementById('use-cases').innerHTML = '<li>Scanning website and generating insights...</li>';
-      document.getElementById('tech-readiness').innerHTML = '';
-      
-      // Submit Netlify form behind the scenes
-      const netlifyFormData = new FormData();
-      netlifyFormData.append('form-name', 'netlify-scan');
-      netlifyFormData.append('name', name);
-      netlifyFormData.append('email', email);
-      netlifyFormData.append('website', website);
+    const resultBox = document.getElementById('result-box');
+    document.getElementById('readiness-score').textContent = '--';
+    document.getElementById('use-cases').innerHTML = '<li>Scanning website and generating insights...</li>';
+    document.getElementById('tech-readiness').innerHTML = '';
 
-      fetch('/', {
+    // Submit Netlify form behind the scenes
+    const netlifyFormData = new FormData();
+    netlifyFormData.append('form-name', 'netlify-scan');
+    netlifyFormData.append('name', name);
+    netlifyFormData.append('email', email);
+    netlifyFormData.append('website', website);
+
+    fetch('/', {
+      method: 'POST',
+      body: netlifyFormData
+    }).catch(err => {
+      console.warn('Silent Netlify notification failed:', err);
+    });
+
+    try {
+      const response = await fetch('/.netlify/functions/scan', {
         method: 'POST',
-        body: netlifyFormData
-      }).catch(err => {
-        console.warn('Silent Netlify notification failed:', err);
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, website })
       });
 
-      try {
-        const response = await fetch('/.netlify/functions/scan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, website })
-        });
+      const data = await response.json();
 
-        const data = await response.json();
-        if (data.report) {
-  const resultHTML = `
+      if (data.report) {
+        const resultHTML = `
   <div class="results-card">
     <h2>🧠 AI Readiness Results</h2>
     <p><strong>Scanned website:</strong> <a href="${website}" target="_blank">${website}</a></p>
@@ -323,43 +323,28 @@ ul {
     </div>
   </div>
 `;
-            document.getElementById('result-box').innerHTML = resultHTML;
-  setTimeout(() => {
-    document.getElementById('result-box').classList.add('visible');
-    // (Optional) update scanned-url text if you want to override it
-    const scannedURL = document.getElementById('scanned-url');
-    if (scannedURL) scannedURL.textContent = website;
-  }, 30);
-}
-          
+        document.getElementById('result-box').innerHTML = resultHTML;
+        setTimeout(() => {
+          document.getElementById('result-box').classList.add('visible');
+          const scannedURL = document.getElementById('scanned-url');
+          if (scannedURL) scannedURL.textContent = website;
+        }, 30);
+      } else {
+        throw new Error(data.error || 'Report generation failed.');
+      }
 
-
-        } else {
-          document.getElementById('result-box').innerHTML = `
+    } catch (err) {
+      document.getElementById('result-box').innerHTML = `
   <div class="results-card">
     <h2>⚠️ Error Generating AI Report</h2>
-    <p>Sorry, something went wrong generating your results.</p>
-    <p>${data.error || 'Please try again later or contact us directly.'}</p>
-  </div>
-`;
-            setTimeout(() => document.getElementById('result-box').classList.add('visible'), 30);
-
-
-          
-        }
-      } catch (err) {
-        document.getElementById('result-box').innerHTML = `
-  <div class="results-card">
-    <h2>⚠️ Error Reaching AI Engine</h2>
     <p>${err.message}</p>
-    <p>Please try again later.</p>
+    <p>Please try again later or contact us directly.</p>
   </div>
 `;
-          setTimeout(() => document.getElementById('result-box').classList.add('visible'), 30);
-
-
-      }
+      setTimeout(() => document.getElementById('result-box').classList.add('visible'), 30);
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>

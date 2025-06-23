@@ -63,7 +63,14 @@ Only return valid JSON — no explanation or extra text.
 
 
     // Try to parse it safely as JSON
-    const content = completion.choices[0].message.content.trim();
+    let content = completion.choices[0].message.content.trim();
+
+// Remove Markdown code block markers if present
+if (content.startsWith("```json")) {
+  content = content.replace(/^```json\s*/, "").replace(/```$/, "").trim();
+} else if (content.startsWith("```")) {
+  content = content.replace(/^```\s*/, "").replace(/```$/, "").trim();
+}
 
 let parsed;
 try {

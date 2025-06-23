@@ -24,24 +24,31 @@ exports.handler = async function (event) {
 const userPrompt = `
 The client has submitted their website: ${website}
 
-Your job is to analyze their AI readiness and return a JSON object like this:
+Your job is to act as a strategic AI consultant and evaluate their AI readiness based on their website.
+
+Return ONLY a JSON object like this:
 {
   "score": 76,
-  "useCases": ["use case 1", "use case 2"],
-  "techReadiness": ["point 1", "point 2", "point 3"]
+  "useCases": ["example use case", "another use case"],
+  "techReadiness": ["tech insight 1", "tech insight 2", "tech insight 3"]
 }
 
-Instructions:
-- Score should reflect realistic digital maturity (0–100)
-- UseCases should be practical and non-technical (aimed at charities or SMEs)
-- techReadiness should highlight specific technologies, limitations, and integrations (mention tools like GPT-4o, Zapier, Make.com, OCR etc.)
-- Mention any tech constraints (no SSL, no CRM, static HTML etc)
-- Always include 2–3 tech buzzwords or AI models.
+Follow these instructions:
+- Score (0–100): Based on digital maturity, security, integrations, and content structure.
+- useCases: 2 practical, non-technical AI use cases tailored to this charity or SME (e.g. donor insights, process automation, FAQ bots).
+- techReadiness:
+  • Always include 3 technical observations or suggestions — make them actionable.
+  • Mention specific AI tools (e.g. GPT-4o, Whisper, Zapier, Make, Claude, OCR, chatbots).
+  • Check for missing basics like SSL certificate, mobile responsiveness, or structured data.
+  • Comment on site tech stack if visible (static HTML? WordPress? CMS?).
+  • Suggest realistic automations or upgrades.
+  • Include at least one website security or infrastructure point if possible.
 
-End with this message as a CTA:
+End with this CTA in plain text:
 "If you'd like to explore how to apply these ideas or see AI in action, book a free 30-min strategy call: https://calendly.com/roland2017/30min"
 
-Return only valid JSON — no other text.
+Only return valid JSON — no explanation or extra text.
+
 `;
 
 

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <meta charset="UTF-8" />
   <title>AI Readiness Scan | Your AI Consultant</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -106,6 +107,54 @@
       max-width: 800px;
       margin: auto;
     }
+    .result-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 2rem;
+  margin-top: 2rem;
+  font-family: 'Segoe UI', sans-serif;
+  line-height: 1.6;
+}
+
+.result-card h2, .result-card h3 {
+  color: #12363f;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.result-card .section {
+  margin-bottom: 1.8rem;
+}
+
+.result-card ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.result-card .score {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #007c91;
+}
+
+.cta-button {
+  background-color: #007c91;
+  color: #fff;
+  padding: 0.75rem 1.2rem;
+  text-decoration: none;
+  border-radius: 8px;
+  display: inline-block;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #005f6b;
+}
+
   </style>
 </head>
 <body>
@@ -134,12 +183,32 @@
     </form>
 
     <div class="result-box" id="result-box">
-      <h2>🔍 AI Readiness Results</h2>
-      <p><strong>Scanned website:</strong> <span id="scanned-url"></span></p>
-      <div id="scan-output" class="styled-report"></div>
-      <a class="cta-button" href="https://calendly.com/roland2017/30min" target="_blank">
-        📞 Schedule a Free AI Consultation
-      </a>
+      <div class="result-card">
+  <h2><i class="fas fa-search"></i> AI Readiness Results</h2>
+  <p><strong>Scanned website:</strong> <span id="scanned-url"></span></p>
+
+  <div class="section">
+    <h3><i class="fas fa-chart-line"></i> Readiness Score</h3>
+    <p class="score" id="readiness-score">--/100</p>
+  </div>
+
+  <div class="section">
+    <h3><i class="fas fa-lightbulb"></i> Potential AI Use Cases</h3>
+    <ul id="use-cases"></ul>
+  </div>
+
+  <div class="section">
+    <h3><i class="fas fa-cogs"></i> Technical AI Readiness</h3>
+    <ul id="tech-readiness"></ul>
+  </div>
+
+  <div class="section">
+    <h3><i class="fas fa-arrow-circle-right"></i> Next Steps</h3>
+    <p>Want to explore your results with an expert or see how to take the next step? Book a free 30-minute call to discuss your AI opportunities.</p>
+    <a class="cta-button" href="https://calendly.com/roland2017/30min" target="_blank">📞 Book Your Free 30-Minute AI Strategy Session</a>
+  </div>
+</div>
+
     </div>
   </div>
 
@@ -167,9 +236,11 @@
 
       document.getElementById('scanned-url').textContent = website;
       const resultBox = document.getElementById('result-box');
-      const scanOutput = document.getElementById('scan-output');
+      document.getElementById('readiness-score').textContent = '--';
+      document.getElementById('use-cases').innerHTML = '<li>Scanning website and generating insights...</li>';
+      document.getElementById('tech-readiness').innerHTML = '';
       resultBox.style.display = 'block';
-      scanOutput.innerHTML = '<p>⏳ Scanning website and generating insights…</p>';
+
 
       // Submit Netlify form behind the scenes
       const netlifyFormData = new FormData();
@@ -194,12 +265,17 @@
 
         const data = await response.json();
         if (data.report) {
-          scanOutput.innerHTML = `<div>${data.report.replace(/\n/g, '<br>')}</div>`;
+          document.getElementById('readiness-score').textContent = data.score || '--';
+          document.getElementById('use-cases').innerHTML = (data.useCases || [])
+          .map(item => `<li>${item}</li>`).join('');
+          document.getElementById('tech-readiness').innerHTML = (data.techReadiness || [])
+          .map(item => `<li>${item}</li>`).join('');
+
         } else {
-          scanOutput.innerHTML = `<p>❌ Something went wrong. ${data.error || ''}</p>`;
+          document.getElementById('use-cases').innerHTML = `<li>❌ Something went wrong. ${data.error || ''}</li>`;
         }
       } catch (err) {
-        scanOutput.innerHTML = `<p>⚠️ Error: ${err.message}</p>`;
+        document.getElementById('use-cases').innerHTML = `<li>⚠️ Error: ${err.message}</li>`;
       }
     }
   </script>

@@ -38,7 +38,7 @@ Then, write a section with specific, practical AI use cases they could consider 
 Finally, add a new section called “Technical AI Readiness” that gives:
 - 2–3 quick observations about their website's technical potential for AI integration
 - Mention tools, models, or APIs they might benefit from (e.g., Zapier, GPT-4o, OCR, Make.com)
-- Note any limitations (e.g. if the site is basic/static, or lacks SSL, CRM etc)
+- Note any limitations (e.g. if the site is basic/static, or lacks SSL, CRM etc) including any security limitations
 
 Write clearly and professionally, using bullet points or markdown style. Keep it to about 250–300 words.
 

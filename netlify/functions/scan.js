@@ -61,10 +61,25 @@ Only return valid JSON — no explanation or extra text.
       temperature: 0.7,
     });
 
-    const content = completion.choices[0].message.content.trim();
 
     // Try to parse it safely as JSON
-    const parsed = JSON.parse(content);
+    const content = completion.choices[0].message.content.trim();
+
+let parsed;
+try {
+  parsed = JSON.parse(content);
+} catch (jsonErr) {
+  console.error("❌ Failed to parse JSON from GPT:", content);
+  return {
+    statusCode: 500,
+    body: JSON.stringify({
+      error: "The AI response could not be parsed as valid JSON.",
+      raw: content,
+      details: jsonErr.message,
+    }),
+  };
+}
+
 
     return {
       statusCode: 200,

@@ -40,6 +40,8 @@ Finally, add a new section called “Technical AI Readiness” that gives:
 - Mention tools, models, or APIs they might benefit from (e.g., Zapier, GPT-4o, OCR, Make.com)
 - Note any limitations (e.g. if the site is basic/static, or lacks SSL, CRM etc) including any security limitations
 
+Make sure on the technical / AI side some buzzwords and detailed technologies are always mentioned at least once. 
+
 Write clearly and professionally, using bullet points or markdown style. Keep it to about 250–300 words.
 
 + "\n\n" +

@@ -24,7 +24,7 @@ exports.handler = async function (event) {
 const userPrompt = `
 The client has submitted their website: ${website}
 
-Your job is to act as a strategic AI consultant and evaluate their AI readiness based on their website.
+Your job is to analyze their AI readiness and return ONLY a valid JSON object like this (with double quotes and no trailing commas):
 
 Return ONLY a JSON object like this:
 {

@@ -1,17 +1,11 @@
 // netlify/functions/scan.js
 
 const OpenAI = require("openai");
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: "Method Not Allowed" }),
-    };
+    return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   try {
@@ -21,66 +15,63 @@ exports.handler = async function (event) {
     if (!website || !name || !email) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Missing website, name, or email" }),
+        body: JSON.stringify({ error: "Missing name, email, or website" }),
       };
     }
 
-    // Generate the report
-    const prompt = `
-ou are an AI consultant. A charity or small business has just entered their website URL: ${website}
+    const systemPrompt = You are a professional AI strategy consultant helping small charities and SMEs.;
+    const userPrompt = 
+The client has submitted their website: ${website}
 
-Your job is to give them a quick AI Readiness Snapshot based on what you can infer from their site.
+Your job is to analyze their AI readiness and return a JSON object like this:
+{
+  "score": 76,
+  "useCases": ["use case 1", "use case 2"],
+  "techReadiness": ["point 1", "point 2", "point 3"]
+}
 
-First, provide a score out of 100 for how ready they appear to be for adopting AI in their organization (based on digital maturity, online presence, etc). Be realistic, not too generous.
+Instructions:
+- Score should reflect realistic digital maturity (0–100)
+- UseCases should be practical and non-technical (aimed at charities or SMEs)
+- techReadiness should highlight specific technologies, limitations, and integrations (mention tools like GPT-4o, Zapier, Make.com, OCR etc.)
+- Mention any tech constraints (no SSL, no CRM, static HTML etc)
+- Always include 2–3 tech buzzwords or AI models.
 
-Then, write a section with specific, practical AI use cases they could consider — especially related to their sector (charity, nonprofit, local business, etc). These should be actionable and understandable to non-technical users.
+End with this message as a CTA:
+"If you'd like to explore how to apply these ideas or see AI in action, book a free 30-min strategy call: https://calendly.com/roland2017/30min"
 
-Finally, add a new section called “Technical AI Readiness” that gives:
-- 2–3 quick observations about their website's technical potential for AI integration
-- Mention tools, models, or APIs they might benefit from (e.g., Zapier, GPT-4o, OCR, Make.com)
-- Note any limitations (e.g. if the site is basic/static, or lacks SSL, CRM etc) including any security limitations
+Return only valid JSON — no other text.;
 
-Make sure on the technical / AI side some buzzwords and detailed technologies are always mentioned at least once. 
-
-Write clearly and professionally, using bullet points or markdown style. Keep it to about 250–300 words.
-
-+ "\n\n" +
-"If you'd like to discuss your results or explore how to take the next step with AI, our team is happy to help. Book a free consultation to get tailored guidance based on your goals and tech stack."
-
-
-`;
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", // or fallback to gpt-3.5-turbo if needed
       messages: [
-        { role: "system", content: "You are an AI strategy consultant." },
-        { role: "user", content: prompt },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
       ],
       temperature: 0.7,
     });
 
-    const resultMarkdown = response.choices[0].message.content;
+    const content = completion.choices[0].message.content.trim();
 
-    // Convert Markdown to basic HTML for rendering
-    const result = resultMarkdown
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // bold
-      .replace(/\n/g, "<br>"); // line breaks
+    // Try to parse it safely as JSON
+    const parsed = JSON.parse(content);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        success: true,
-        scanned: website,
-        report: result,
+        score: parsed.score,
+        useCases: parsed.useCases,
+        techReadiness: parsed.techReadiness,
+        report: content, // raw JSON string if needed
       }),
     };
+
   } catch (err) {
-    console.error("Error:", err);
-    console.error("Error stack:", err.stack);
+    console.error("ERROR", err.message, err.stack);
     return {
       statusCode: 500,
       body: JSON.stringify({
-        error: "Something went wrong",
+        error: "Something went wrong.",
         details: err.message,
       }),
     };

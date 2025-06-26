@@ -178,6 +178,24 @@ body {
     </div>
   </section>
 
+  <section class="section">
+  <div class="lead-magnet">
+    <h2>🎯 Run Your Free AI Readiness Scan</h2>
+    <p>Instantly see how AI-ready your charity or business is — no forms, no faff.</p>
+
+    <form onsubmit="event.preventDefault(); window.location.href='/aiscan.html?website=' + encodeURIComponent(this.website.value);">
+      <input type="text" name="website" pattern=".*\..*" placeholder="https://example.org or aceofclubs.org.uk" required />
+      <br>
+      <button class="lead-magnet-cta" type="submit">🔍 Run My Free AI Scan</button>
+    </form>
+
+    <p style="font-size:0.95em;color:#666;margin:10px 0 0 0;">
+      You'll get your AI readiness score instantly on the next page.
+    </p>
+  </div>
+</section>
+
+
 <section class="section">
   <div class="lead-magnet">
     <h2>Let Us Recommend 5 AI Tools for You — Instantly</h2>

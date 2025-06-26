@@ -194,10 +194,6 @@
 
  <div class="container">
   <form id="ai-scan-form" onsubmit="handleScan(event)">
-    <label>Your name:</label>
-    <input type="text" name="name" required />
-    <label>Email address:</label>
-    <input type="email" name="email" required />
     <label>Enter your organisation website / URL:</label>
     <input type="text" name="website" placeholder="https://example.org or aceofclubs.org.uk" pattern=".*\..*" required />
     <button type="submit" id="scan-button" aria-busy="false">Run AI Scan</button>
@@ -230,8 +226,8 @@
     event.preventDefault();
 
     const form = document.getElementById('ai-scan-form');
-    const name = form.querySelector('input[name="name"]').value.trim();
-    const email = form.querySelector('input[name="email"]').value.trim();
+    const name = "";  // placeholder for now
+    const email = ""; // placeholder for now
     let website = form.querySelector('input[name="website"]').value.trim();
     const resultBox = document.getElementById('result-box');
     const scanButton = document.getElementById('scan-button');

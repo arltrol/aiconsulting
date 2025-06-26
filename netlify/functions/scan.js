@@ -12,12 +12,16 @@ exports.handler = async function (event) {
     const body = JSON.parse(event.body || '{}');
     const { website, name, email } = body;
 
-    if (!website || !name || !email) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Missing name, email, or website" }),
-      };
-    }
+  if (!website) {
+  return {
+    statusCode: 400,
+    body: JSON.stringify({ error: "Missing website" })
+  };
+}
+
+// Set fallback for name/email if not provided
+const safeName = name || "Anonymous";
+const safeEmail = email || "anonymous@youraiconsultant.london";
 
      const systemPrompt = "You are a professional AI strategy consultant helping small charities and SMEs.";
 

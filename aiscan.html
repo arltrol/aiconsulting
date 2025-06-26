@@ -236,40 +236,29 @@
 </footer>
 
 <script>
-  // Get ?email and ?name from URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const prefillName = urlParams.get("name") || "";
-  const prefillEmail = urlParams.get("email") || "";
-
-  // Inject into hidden fields + clean URL
   document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("hidden-name").value = prefillName;
-    document.getElementById("hidden-email").value = prefillEmail;
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefillName = urlParams.get("name") || "";
+    const prefillEmail = urlParams.get("email") || "";
+    const website = urlParams.get("website") || "";
 
-    // Clean the URL so email/name don't stay visible in address bar
-    window.history.replaceState({}, document.title, window.location.pathname);
-  });
-</script>
-
-    
-  <script>
-      
-  document.addEventListener("DOMContentLoaded", function () {
-  const params = new URLSearchParams(window.location.search);
-  const website = params.get("website");
-
-  if (website) {
     const input = document.querySelector('input[name="website"]');
     const scanButton = document.getElementById("scan-button");
+    const hiddenName = document.getElementById("hidden-name");
+    const hiddenEmail = document.getElementById("hidden-email");
 
-    // Delay execution slightly to ensure DOM is fully ready
-    setTimeout(() => {
-      if (input) input.value = website;
-      if (scanButton) scanButton.click();
-    }, 200); // 200ms delay usually enough
-  }
-});
+    if (hiddenName) hiddenName.value = prefillName;
+    if (hiddenEmail) hiddenEmail.value = prefillEmail;
+    if (input && website) input.value = website;
 
+    // Clean up URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    // Auto-trigger scan if website is present
+    if (website && scanButton) {
+      setTimeout(() => scanButton.click(), 200);
+    }
+  });
 
   async function handleScan(event) {
     event.preventDefault();
@@ -283,7 +272,7 @@
     const resultBox = document.getElementById('result-box');
     const scanButton = document.getElementById('scan-button');
 
-    // Prepare UI for scanning
+    // Prepare UI
     scanButton.disabled = true;
     scanButton.textContent = "Scanning...";
     scanButton.setAttribute("aria-busy", "true");
@@ -292,7 +281,7 @@
       website = 'https://' + website;
     }
 
-    // Send Netlify notification silently
+    // Trigger Netlify notification
     const netlifyFormData = new FormData();
     netlifyFormData.append('form-name', 'netlify-scan');
     netlifyFormData.append('name', name);
@@ -369,6 +358,8 @@
   }
 </script>
 
+
+    
   
 </body>
 </html>

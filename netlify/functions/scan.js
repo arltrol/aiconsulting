@@ -24,7 +24,7 @@ const safeName = name || "Anonymous";
 const safeEmail = email || "anonymous@youraiconsultant.london";
 
      const systemPrompt = "You are a professional AI strategy consultant helping small charities and SMEs.";
-
+    
 const userPrompt = `
 The client has submitted their website: ${website}
 
@@ -55,6 +55,16 @@ Only return valid JSON — no explanation or extra text.
 
 `;
 
+    function fixJSON(messyString) {
+  try {
+    const match = messyString.match(/{[\s\S]*}/);
+    if (match) return JSON.parse(match[0]);
+  } catch (e) {
+    console.error("fixJSON error:", e);
+  }
+  return null;
+}
+
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo", // or fallback to gpt-3.5-turbo if needed
@@ -76,21 +86,17 @@ if (content.startsWith("```json")) {
   content = content.replace(/^```\s*/, "").replace(/```$/, "").trim();
 }
 
-let parsed;
-try {
-  parsed = JSON.parse(content);
-} catch (jsonErr) {
-  console.error("❌ Failed to parse JSON from GPT:", content);
+const parsed = fixJSON(content);
+if (!parsed) {
+  console.error("❌ Failed to recover JSON:", content);
   return {
     statusCode: 500,
     body: JSON.stringify({
       error: "The AI response could not be parsed as valid JSON.",
-      raw: content,
-      details: jsonErr.message,
+      raw: content
     }),
   };
 }
-
 
     return {
       statusCode: 200,

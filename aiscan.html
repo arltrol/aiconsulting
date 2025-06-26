@@ -253,6 +253,24 @@
 
     
   <script>
+      
+  document.addEventListener("DOMContentLoaded", function () {
+  const params = new URLSearchParams(window.location.search);
+  const website = params.get("website");
+
+  if (website) {
+    const input = document.querySelector('input[name="website"]');
+    const scanButton = document.getElementById("scan-button");
+
+    // Delay execution slightly to ensure DOM is fully ready
+    setTimeout(() => {
+      if (input) input.value = website;
+      if (scanButton) scanButton.click();
+    }, 200); // 200ms delay usually enough
+  }
+});
+
+
   async function handleScan(event) {
     event.preventDefault();
 

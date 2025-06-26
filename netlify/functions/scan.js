@@ -30,7 +30,7 @@ The client has submitted their website: ${website}
 
 Your job is to analyze their AI readiness and return ONLY a valid JSON object like this (with double quotes and no trailing commas):
 
-Return ONLY a JSON object like this:
+Return ONLY a valid JSON object with all keys in double quotes, like this:
 {
   "score": 76,
   "useCases": ["example use case", "another use case"],

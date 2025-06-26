@@ -209,6 +209,8 @@
   <form id="ai-scan-form" onsubmit="handleScan(event)">
     <label>Enter your organisation website / URL:</label>
     <input type="text" name="website" placeholder="https://example.org or aceofclubs.org.uk" pattern=".*\..*" required />
+    <input type="hidden" name="name" id="hidden-name" />
+    <input type="hidden" name="email" id="hidden-email" />
     <button type="submit" id="scan-button" aria-busy="false">Run AI Scan</button>
   </form>
 
@@ -233,14 +235,30 @@
   </div>
 </footer>
 
+<script>
+  // Get ?email and ?name from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const prefillName = urlParams.get("name") || "";
+  const prefillEmail = urlParams.get("email") || "";
 
+  // Inject into hidden fields + clean URL
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("hidden-name").value = prefillName;
+    document.getElementById("hidden-email").value = prefillEmail;
+
+    // Clean the URL so email/name don't stay visible in address bar
+    window.history.replaceState({}, document.title, window.location.pathname);
+  });
+</script>
+
+    
   <script>
   async function handleScan(event) {
     event.preventDefault();
 
     const form = document.getElementById('ai-scan-form');
-    const name = "";  // placeholder for now
-    const email = ""; // placeholder for now
+     const name = form.querySelector('input[name="name"]').value.trim();
+    const email = form.querySelector('input[name="email"]').value.trim();
     let website = form.querySelector('input[name="website"]').value.trim();
     const resultBox = document.getElementById('result-box');
     const scanButton = document.getElementById('scan-button');

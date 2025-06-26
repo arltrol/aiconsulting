@@ -76,16 +76,16 @@
     border-radius: 5px;
   }
 
-  button {
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    padding: 0.9rem 1.5rem;
-    font-size: 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 1.5rem;
-  }
+ button {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.9rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 0.5rem; /* was 1.5rem — this improves alignment */
+}
 
   .result-box {
     opacity: 0;
@@ -190,6 +190,10 @@
     max-width: 800px;
     margin: auto;
   }
+     form input[type="text"] {
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+}
 </style>
 
 

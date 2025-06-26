@@ -257,8 +257,10 @@
     event.preventDefault();
 
     const form = document.getElementById('ai-scan-form');
-     const name = form.querySelector('input[name="name"]').value.trim();
-    const email = form.querySelector('input[name="email"]').value.trim();
+    let name = form.querySelector('input[name="name"]').value.trim();
+    let email = form.querySelector('input[name="email"]').value.trim();
+    if (!name) name = "Anonymous";
+    if (!email) email = "anonymous@youraiconsultant.london";
     let website = form.querySelector('input[name="website"]').value.trim();
     const resultBox = document.getElementById('result-box');
     const scanButton = document.getElementById('scan-button');
